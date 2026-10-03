@@ -1,0 +1,966 @@
+SAFESHIFT — PROJECT INSTRUCTIONS
+Private project codename: SafeShit
+Public working name: SafeShift
+
+MISSION
+
+Build SafeShift as a rigorous, local-first engineering system for incrementally replacing important memory-unsafe legacy C components with memory-safe Rust implementations while establishing, preserving, and maintaining honest evidence about what behavior was preserved.
+
+The immediate goal is NOT to build a universal C-to-Rust translator, a polished startup product, or a giant verification platform.
+
+The immediate goal is to prove whether SafeShift can improve a real migration workflow beyond strong existing tools on real stateful software.
+
+A successful project must be able to conclude that its own idea is unnecessary.
+
+--------------------------------------------------
+1. PROBLEM FIRST, NOT PRODUCT FIRST
+--------------------------------------------------
+
+The problem is:
+
+Important software still relies on memory-unsafe components that are difficult to replace without introducing new behavioral, compatibility, performance, or maintenance failures.
+
+Do not begin from:
+
+- “build an AI C-to-Rust translator”
+- “build a Rust dashboard”
+- “build a verification platform”
+- “build something for manufacturing because manufacturing sounds large”
+
+Begin from a real migration problem and the strongest existing workflow used to solve it.
+
+The project exists only if evidence shows a useful unresolved boundary.
+
+--------------------------------------------------
+2. PRIOR ART IS PART OF THE BASELINE
+--------------------------------------------------
+
+Assume from the beginning that major parts already exist.
+
+Relevant prior art includes, where applicable:
+
+- manual Rust ports
+- C2Rust
+- SAW / Crux
+- Kani
+- CBMC
+- VERT
+- &inator
+- CRISP & CLEAR / DARPA TRACTOR
+- differential testing
+- fuzzing
+- property testing
+- symbolic execution
+- translation validation
+- ownership inference
+- safe wrappers
+- CI integration
+- proof caching / incremental verification concepts
+
+Do not rename existing techniques and claim novelty.
+
+Every proposed mechanism must answer:
+
+“What can this do, or what cost can this remove, that the strongest existing workflow cannot?”
+
+--------------------------------------------------
+3. ARCHITECTURE IS A WORKING HYPOTHESIS
+--------------------------------------------------
+
+Unlike a mature production architecture, SafeShift’s architecture is not sacred.
+
+Architecture changes are allowed when supported by:
+
+- a concrete implementation failure
+- a stronger existing tool
+- a better experimental design
+- a security/correctness issue
+- an observed integration bottleneck
+- measured evidence
+
+Do not redesign repeatedly because a new framework looks interesting.
+
+Prefer the smallest architecture capable of testing the current hypothesis.
+
+--------------------------------------------------
+4. INITIAL PRODUCT MODEL
+--------------------------------------------------
+
+SafeShift operates on a software repository, not pasted snippets.
+
+The conceptual input is:
+
+SOURCE REPOSITORY
++
+REPRODUCIBLE BUILD ENVIRONMENT
++
+TARGET COMPONENT / MIGRATION BOUNDARY
++
+BEHAVIOR CONTRACT
++
+AVAILABLE EVIDENCE
+(tests, callers, protocol specs, fixtures, fuzz corpora, standards, maintainer requirements)
+
+The conceptual output is:
+
+CANDIDATE REPLACEMENT
++
+COUNTEREXAMPLES
++
+EVIDENCE CLASSIFICATION
++
+REMAINING ASSUMPTIONS
++
+UNSUPPORTED BEHAVIOR
++
+PERFORMANCE / ABI / FFI FINDINGS
++
+DEPENDENCY / INVALIDATION INFORMATION
+
+--------------------------------------------------
+5. MIGRATE INCREMENTALLY
+--------------------------------------------------
+
+Never treat a million-line repository as one verification unit.
+
+Large repositories may be analyzed globally for:
+
+- dependency structure
+- build structure
+- callers
+- interfaces
+- candidate boundaries
+- exposure
+- statefulness
+- risk
+
+But migration proceeds component by component.
+
+Prefer early targets with:
+
+- a clear interface
+- meaningful state
+- real callers
+- existing tests or fixtures
+- security or reliability relevance
+- manageable build complexity
+- a bounded initial semantic scope
+
+Do not begin with arbitrary C++, kernels, or universal concurrency.
+
+--------------------------------------------------
+6. SAFE RUST IS NOT ENOUGH
+--------------------------------------------------
+
+A Rust implementation can be memory-safe and still be behaviorally wrong.
+
+SafeShift must distinguish:
+
+- memory safety
+- functional behavior
+- panic behavior
+- ABI compatibility
+- FFI soundness
+- resource behavior
+- error behavior
+- performance
+- concurrency semantics
+- external side effects
+
+Never claim “safe” or “verified” when only one of these dimensions was checked.
+
+--------------------------------------------------
+7. OLD C IS NOT AUTOMATICALLY GROUND TRUTH
+--------------------------------------------------
+
+Preserve intended, defined behavior.
+
+Do not blindly preserve:
+
+- undefined behavior
+- memory corruption
+- accidental implementation quirks
+- known vulnerabilities
+- malformed-input behavior that must intentionally change
+
+When C and Rust differ, SafeShift must determine which of the following applies:
+
+- Rust regression
+- C bug intentionally fixed
+- undefined source behavior
+- contract ambiguity
+- unsupported case
+- implementation difference allowed by the contract
+
+If the intended behavior cannot be established, say so.
+
+--------------------------------------------------
+8. CONTRACTS ARE EXPLICIT
+--------------------------------------------------
+
+Every serious migration claim requires an explicit behavior contract.
+
+Contracts may be derived from:
+
+- standards
+- API documentation
+- tests
+- callers
+- protocol specifications
+- maintainer requirements
+- existing invariants
+- real recorded behavior
+- independently reviewed specifications
+
+A model may suggest a contract.
+
+A model suggestion is not authoritative.
+
+For comparative experiments, freeze the agreed contract before evaluating candidates whenever practical.
+
+Do not change the contract after seeing a candidate failure merely to make the candidate pass.
+
+--------------------------------------------------
+9. EVIDENCE TYPES MUST REMAIN DISTINCT
+--------------------------------------------------
+
+SafeShift must never collapse everything into a green pass badge.
+
+Every result should be classified explicitly as one of:
+
+PROVED
+- established under stated assumptions by an applicable proof/verification method
+
+BOUNDED
+- checked within a declared bounded state/input/schedule/model space
+
+TESTED
+- observed on stated test/fuzz/property cases
+
+REFUTED
+- a reproducible counterexample violates the claimed contract
+
+UNSUPPORTED
+- the current system cannot make a meaningful claim
+
+ASSUMED
+- the result depends on an explicit external assumption not independently established here
+
+The UI, CLI, reports, and CI must preserve these distinctions.
+
+--------------------------------------------------
+10. MODELS ARE NOT ORACLES
+--------------------------------------------------
+
+Codex, Claude, ChatGPT, or any other model may:
+
+- propose Rust code
+- propose contracts
+- suggest invariants
+- explain traces
+- propose tests
+- review code
+- generate adapters
+- search for suspicious assumptions
+
+They may NOT be the final correctness oracle.
+
+Evidence must come from appropriate combinations of:
+
+- compilation
+- real execution
+- differential execution
+- tests
+- fuzzing
+- sanitizers
+- property checks
+- symbolic execution
+- proof engines
+- formal models
+- standards
+- maintainer-reviewed requirements
+- independently reproducible counterexamples
+
+Never cite model agreement as proof.
+
+--------------------------------------------------
+11. CANDIDATE SOURCE IS IRRELEVANT TO TRUST
+--------------------------------------------------
+
+A candidate Rust replacement may come from:
+
+- a human engineer
+- Codex
+- another model
+- C2Rust
+- an existing open-source port
+- a specialized transformation tool
+
+SafeShift must evaluate the artifact, not the reputation of the generator.
+
+The generator is never allowed to self-certify correctness.
+
+--------------------------------------------------
+12. LOCAL-FIRST BY DEFAULT
+--------------------------------------------------
+
+Target repositories may contain proprietary, safety-sensitive, security-sensitive, industrial, embedded, or regulated source code.
+
+Prefer local execution for:
+
+- repository analysis
+- build capture
+- compilation
+- differential execution
+- fuzzing
+- verification artifacts
+- evidence storage
+
+Do not make cloud upload a requirement for the core workflow.
+
+Optional remote/model services must be isolated from sensitive code by explicit user choice and clearly documented boundaries.
+
+--------------------------------------------------
+13. INITIAL TECHNOLOGY DIRECTION
+--------------------------------------------------
+
+Use this as the default technical direction until evidence suggests otherwise:
+
+Core engine / CLI:
+- Rust
+
+Legacy input:
+- C initially
+
+Migration target:
+- Rust initially
+
+Source/build understanding:
+- Clang / LLVM where appropriate
+- existing project build systems such as CMake/Make/Ninja/Bazel as encountered
+
+Candidate generation / baseline:
+- manual port
+- C2Rust where useful
+- optional Codex-generated candidate
+
+FFI / ABI:
+- C ABI
+- bindgen / cbindgen where useful
+- explicit unsafe boundary review
+
+Dynamic evidence:
+- differential execution
+- sanitizers such as ASan / UBSan where appropriate
+- libFuzzer / cargo-fuzz / AFL++ where appropriate
+- property testing such as proptest where useful
+
+Formal / symbolic tools:
+- SAW / Crux / Kani / CBMC or other scoped tools only where they provide real value
+
+Evidence persistence:
+- files/artifacts first
+- SQLite only when persistence/querying justifies it
+
+Version/change tracking:
+- Git
+
+UI:
+- React + TypeScript
+- add only after the core evidence pipeline works
+- Tauri is a reasonable local-desktop option if/when a desktop UI becomes justified
+
+Do not build a compiler, theorem prover, SMT solver, or fuzzing engine from scratch unless a validated research gap specifically requires it.
+
+--------------------------------------------------
+14. DIFFERENTIAL EXECUTION IS A TOOL, NOT A PROOF
+--------------------------------------------------
+
+Running C and Rust on the same input is valuable.
+
+It can establish observed agreement or disagreement on those executions.
+
+It does NOT by itself prove semantic equivalence.
+
+Use differential execution to:
+
+- discover counterexamples
+- characterize behavior
+- validate test harnesses
+- support contract development
+- catch regressions
+
+Do not label broad equivalence from sampled success.
+
+--------------------------------------------------
+15. COUNTEREXAMPLES ARE FIRST-CLASS OUTPUTS
+--------------------------------------------------
+
+When SafeShift finds a behavior difference, preserve:
+
+- exact input
+- build identifiers
+- compiler/toolchain versions
+- environment
+- original output/state
+- candidate output/state
+- violated contract
+- relevant call/state trace
+- minimal reproduction where possible
+
+Counterexample reduction must preserve the meaning of the original failure.
+
+Do not produce a smaller case that triggers a different bug and call it the same counterexample.
+
+--------------------------------------------------
+16. BUILD REPRODUCIBILITY MATTERS
+--------------------------------------------------
+
+A migration claim is meaningless if the original build cannot be reproduced.
+
+Capture when relevant:
+
+- source commit
+- compiler version
+- compiler flags
+- target triple / architecture
+- relevant environment variables
+- generated headers
+- dependency versions
+- feature flags
+- build scripts
+- test configuration
+
+A result must identify the build it actually covers.
+
+Do not silently generalize one build result to all platforms or toolchains.
+
+--------------------------------------------------
+17. FFI AND UNSAFE BOUNDARIES ARE EXPLICIT
+--------------------------------------------------
+
+Replacing C internally with Rust while retaining a C-facing interface may be the correct migration strategy.
+
+But the C/Rust boundary must be inspectable.
+
+Track:
+
+- ownership assumptions
+- aliasing assumptions
+- lifetime assumptions
+- nullability
+- buffer lengths
+- callback behavior
+- allocator ownership
+- thread-safety expectations
+- panic crossing behavior
+- ABI layout
+
+Do not hide broad unsafe regions behind a thin wrapper and claim the migration is safe.
+
+--------------------------------------------------
+18. EVIDENCE MUST BECOME STALE WHEN ITS ASSUMPTIONS CHANGE
+--------------------------------------------------
+
+Long-term SafeShift value depends on maintaining evidence, not merely generating it once.
+
+Track dependencies between evidence and:
+
+- source files
+- headers
+- callers
+- contracts
+- build flags
+- dependencies
+- compiler/toolchain versions
+- verification-tool versions
+- target platforms
+
+When one changes, invalidate only the affected evidence when possible.
+
+Do not silently reuse stale proof/test claims.
+
+A major research question is whether this dependency-aware maintenance materially reduces proof/review repair cost.
+
+--------------------------------------------------
+19. STRONGEST BASELINE OR THE EXPERIMENT IS INVALID
+--------------------------------------------------
+
+Never compare SafeShift against a deliberately weak baseline.
+
+For each study use the strongest practical existing workflow available for that target, which may include:
+
+- expert manual Rust port
+- C2Rust
+- strong tests
+- differential testing
+- fuzzing
+- sanitizers
+- existing verification tools
+- existing hand-written port
+
+If an existing tool already does the proposed SafeShift feature equally well, use it.
+
+If the best result is an upstream contribution instead of a new platform, do that.
+
+--------------------------------------------------
+20. HUMAN EFFORT IS A PRIMARY METRIC
+--------------------------------------------------
+
+Do not optimize for:
+
+- translated lines
+- number of generated files
+- number of tests
+- number of solver calls
+- dashboard features
+
+Measure total useful engineering cost, including:
+
+- contract creation
+- environment setup
+- migration work
+- review
+- harness creation
+- proof/check repair
+- unsupported-case analysis
+- later maintenance
+- performance work
+- integration work
+
+A technically impressive system that moves the burden into unreadable specifications has failed.
+
+--------------------------------------------------
+21. FIRST DECISIVE EXPERIMENT
+--------------------------------------------------
+
+Central question:
+
+Can one specific addition to existing tools reduce the human cost of an acceptable, behavior-preserving safe migration and its later maintenance without lowering assurance?
+
+Use three real, stateful modules when the harness is ready.
+
+Prefer a coherent initial scope such as:
+
+- single-threaded
+- byte-oriented or similarly reviewable interfaces
+- meaningful mutable state
+- real callers
+- realistic malformed and valid inputs
+
+Before candidate generation, freeze when practical:
+
+- preservation contract
+- supported build
+- caller assumptions
+- permitted safety repairs
+
+Include held-out:
+
+- code regressions
+- contract mistakes
+- interface mistakes
+- source/build changes
+- stale-evidence cases
+
+Measure:
+
+- initial human hours
+- subsequent maintenance/review hours
+- useful behavior coverage
+- proved/bounded/tested/assumed portions separately
+- rejection of bad candidates
+- acceptance of legitimate alternatives
+- remaining unsafe obligations
+- unsupported behavior
+- performance
+- independent maintainer acceptance
+
+A proposed screening rule is:
+
+- at least 30% lower total human effort on two of three modules
+- at equal or better agreed coverage
+- with no incorrectly accepted seeded regression inside the claimed guarantee
+
+This is a project decision threshold, not an industry standard.
+
+--------------------------------------------------
+22. MANUFACTURING / INDUSTRIAL DISCOVERY IS PARALLEL, NOT DOGMA
+--------------------------------------------------
+
+The industrial/manufacturing direction is promising but not proven.
+
+Use conversations with MAGNET, manufacturers, machine builders, controls integrators, embedded teams, industrial OEMs, and related engineers to discover actual modernization pain.
+
+Do NOT force the answer to be C-to-Rust.
+
+Possible real pains may include:
+
+- legacy embedded firmware
+- C/C++ maintenance
+- PLC migration
+- controller replacement
+- HMI modernization
+- protocol conversion
+- missing documentation
+- certification
+- cybersecurity
+- downtime risk
+- behavior validation
+- lack of engineers who understand the legacy system
+
+SafeShift remains C-to-Rust only if real evidence supports that wedge.
+
+The deeper project principle is trustworthy legacy-software modernization.
+
+--------------------------------------------------
+23. REAL TARGETS BEFORE TOY TARGETS
+--------------------------------------------------
+
+Toy functions are useful for harness development only.
+
+Do not use them as evidence of product/research value.
+
+After the harness works, move quickly to real open-source or partner modules with:
+
+- state
+- interfaces
+- callers
+- error behavior
+- existing tests
+- realistic build systems
+
+Industrial communication, parsing, codecs, embedded libraries, or protocol modules are reasonable categories.
+
+Do not lock to any single library before inspecting its suitability and license.
+
+--------------------------------------------------
+24. CODEX IS THE PRIMARY IMPLEMENTATION WORKER
+--------------------------------------------------
+
+Codex should perform most implementation work, including:
+
+- repository setup
+- Rust core
+- TypeScript/React UI when justified
+- adapters
+- CLI
+- build tooling
+- tests
+- fuzz harnesses
+- benchmark harnesses
+- refactors
+- debugging
+- documentation
+
+Codex should receive bounded milestone prompts.
+
+Do not give Codex a vague instruction such as “build SafeShift.”
+
+Each milestone must define:
+
+- scope
+- non-goals
+- files/components
+- acceptance criteria
+- tests
+- evidence/reporting requirements
+
+--------------------------------------------------
+25. CLAUDE IS AN ADVERSARIAL REVIEWER, NOT A SECOND IMPLEMENTER
+--------------------------------------------------
+
+Use Claude at important correctness and research checkpoints to attack:
+
+- contracts
+- equivalence claims
+- unsafe/FFI assumptions
+- experimental design
+- proof/test boundaries
+- counterexamples
+- evaluation leakage
+- novelty claims
+- hidden exclusions
+
+Avoid having Codex and Claude simultaneously make unsupervised edits to the same repository.
+
+Preferred loop:
+
+Architecture/specification
+→ Codex implementation
+→ tests/evidence
+→ Claude adversarial review
+→ decision
+→ Codex fixes/next milestone
+
+Claude agreement is not proof.
+
+--------------------------------------------------
+26. CHATGPT ROLE
+--------------------------------------------------
+
+ChatGPT serves as:
+
+- architect
+- project planner
+- research synthesizer
+- milestone writer
+- reviewer
+- experimental-design partner
+- claim auditor
+- PASS / FIX / PIVOT decision support
+
+Do not protect SafeShift because prior work has been invested.
+
+If evidence shows the hypothesis is weak, recommend simplifying, upstreaming, pivoting, or stopping.
+
+--------------------------------------------------
+27. NO UI-FIRST DEVELOPMENT
+--------------------------------------------------
+
+Do not build first:
+
+- polished React dashboard
+- marketing website
+- billing
+- hosted SaaS
+- team accounts
+- auth platform
+- giant repository browser
+- AI chat assistant
+- enterprise admin console
+
+First prove:
+
+real C component
+→ candidate Rust
+→ shared contract
+→ comparable execution
+→ counterexample or scoped evidence
+→ reproducible artifact
+
+UI comes after the evidence pipeline deserves one.
+
+--------------------------------------------------
+28. INITIAL MILESTONE ORDER
+--------------------------------------------------
+
+Use this as the default build order. Adjust only with evidence.
+
+SS-001 — repository/bootstrap/toolchain verification
+- Rust workspace
+- test framework
+- CI
+- Clang/GCC available
+- Cargo/rustc available
+- one tiny fixture only to validate the harness
+
+SS-002 — real baseline target reproduction
+- select one real C module
+- reproduce its original build/tests
+- capture exact source/build environment
+
+SS-003 — build/source manifest
+- commits
+- compiler flags
+- interfaces
+- target platform
+- relevant dependencies
+
+SS-004 — migration-boundary model
+- target files
+- public interface
+- callers
+- mutable state
+- callbacks
+- ownership/aliasing concerns
+
+SS-005 — dual execution harness
+- compile original C
+- compile candidate Rust
+- invoke both under controlled identical inputs
+- record outputs/state
+
+SS-006 — candidate adapter
+- support at least one candidate source: manual, C2Rust, or Codex-generated
+- keep generator identity separate from evidence
+
+SS-007 — contract schema and evidence taxonomy
+- PROVED
+- BOUNDED
+- TESTED
+- REFUTED
+- UNSUPPORTED
+- ASSUMED
+
+SS-008 — differential comparison engine
+- compare observable contract-relevant behavior
+- no broad equivalence claims
+
+SS-009 — fuzzing + sanitizer integration
+- generate nontrivial cases
+- characterize source failures separately
+
+SS-010 — counterexample capture/reduction
+- reproducible minimal failure artifact
+- preserve causal meaning
+
+SS-011 — ABI/FFI boundary inspection
+- explicit ownership/lifetime/aliasing/allocator/panic assumptions
+
+SS-012 — evidence bundle
+- machine-readable + human-readable result
+- exact build/tool versions
+- claims and limitations
+
+SS-013 — dependency/evidence graph
+- map claims to source/callers/contracts/build/toolchain
+
+SS-014 — change invalidation
+- modify caller/header/build/dependency
+- stale only affected evidence where possible
+
+SS-015 — first real stateful module complete
+- end-to-end migration and evidence
+- performance and maintainability report
+
+SS-016 — second independent module
+- prove the harness is not target-specific
+
+SS-017 — strongest-baseline comparison
+- competent existing workflow
+- matched scope and effort accounting
+
+SS-018 — held-out regressions and later changes
+- include seeded bad candidates and stale-proof cases
+
+SS-019 — third module + independent review
+- external or independent maintainer/reviewer where possible
+
+SS-020 — decisive experiment / go-no-go
+- compare total human effort
+- compare useful coverage
+- compare incorrect accepts/rejects
+- publish limitations
+- decide CONTINUE / SIMPLIFY / UPSTREAM / PIVOT / STOP
+
+Stop after SS-020 before expanding product scope.
+
+--------------------------------------------------
+29. SUCCESS STANDARD
+--------------------------------------------------
+
+SafeShift is NOT successful because:
+
+- C translated to Rust
+- Rust compiled
+- unit tests passed
+- fuzzing ran for a long time
+- a solver returned SAT/UNSAT
+- the UI looks impressive
+- a model said the implementations are equivalent
+
+SafeShift succeeds only if it demonstrates a useful advantage on a real migration problem.
+
+Evidence of success may include:
+
+- a real accepted safer replacement
+- important counterexamples missed by normal workflow
+- lower total human effort at equal/better assurance
+- a new supported verification boundary
+- maintainable evidence across later changes
+- an upstream contribution accepted by an existing project
+- a reproducible benchmark/corpus
+- a credible negative result that changes what should be built
+
+--------------------------------------------------
+30. KILL / REDIRECT CRITERIA
+--------------------------------------------------
+
+Kill or substantially redirect the standalone SafeShift approach if:
+
+- the strongest existing workflow already matches it on cost and assurance
+- the advantage disappears after counting specification/review/maintenance
+- success requires weakening contracts
+- realistic callers must be excluded to make claims pass
+- broad unsafe regions remain hidden behind wrappers
+- bounded testing is presented as proof
+- useful coverage collapses outside toy functions
+- performance or maintainability prevents real acceptance
+- later changes require near-total verification reconstruction with no improvement path
+- an independent evaluator cannot reproduce the claims
+
+Do not rescue a failed experiment by adding AI, dashboards, more frameworks, or a larger product surface.
+
+Upstreaming to an existing project is a valid success path.
+
+--------------------------------------------------
+31. ENGINEERING STYLE
+--------------------------------------------------
+
+Prefer:
+
+- Rust for correctness-critical core logic
+- explicit types and state machines
+- deterministic tooling where possible
+- small composable adapters
+- reproducible builds
+- stable artifact formats
+- property tests
+- fuzzing
+- invariant tests
+- failure injection where useful
+- explicit assumptions
+- versioned evidence
+- narrow claims
+- benchmarkable mechanisms
+- local-first execution
+- honest unsupported states
+
+Avoid:
+
+- giant abstractions before evidence
+- universal claims
+- hidden unsafe code
+- model-as-oracle logic
+- proof theater
+- unverifiable “AI confidence” scores
+- pretty dashboards before useful evidence
+- building custom infrastructure that existing mature tools already provide
+
+--------------------------------------------------
+32. 10/10 ENGINEERING STANDARD
+--------------------------------------------------
+
+A 10/10 SafeShift implementation would require exceptional successful execution against a consequential problem.
+
+It should demonstrate:
+
+- explicit contracts and failure boundaries
+- substantial original technical judgment
+- nontrivial systems/algorithmic mechanisms
+- justified correctness/security/performance/usability tradeoffs
+- robustness under abnormal and hostile cases
+- maintainability
+- independent evaluation on representative systems
+- reproducible counterexamples
+- inspectable assumptions
+- a material improvement over standard components assembled together
+
+Do not call the project 10/10 because it is large, uses formal tools, or took a long time.
+
+The grade must be earned by the result.
+
+--------------------------------------------------
+33. PROJECT PRINCIPLE
+--------------------------------------------------
+
+SafeShift is not trying to prove that old software and new software are “the same.”
+
+It is trying to answer a narrower and more useful question:
+
+“What behavior do we actually need to preserve, what evidence do we have that the replacement preserves it, what remains unknown, and when does that evidence stop being valid?”
+
+The project should make those answers cheaper, clearer, more reproducible, and more trustworthy than the strongest existing workflow.
+
+That is the job.
