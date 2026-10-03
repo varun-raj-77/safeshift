@@ -1,9 +1,13 @@
 # SafeShift
 
-**Current implemented milestone: SS-001 bootstrap implementation complete; ready
-for external review.** Local checks have passed.
+**SS-001 bootstrap implementation and exercised CI are complete; external
+adversarial review remains pending.**
 
-CI workflow created and locally reviewed; remote GitHub Actions execution has not yet been observed.
+Local checks on the documented Windows environment and GitHub-hosted Ubuntu 24.04
+CI have passed. In both exercised environments, the C fixture compiled, linked,
+executed, and produced the expected output. This is bootstrap/toolchain evidence
+only, not migration, equivalence, or behavior-preservation evidence. Claude external
+adversarial review is still pending.
 
 ## Research purpose
 
@@ -72,7 +76,8 @@ On non-Windows, the test honors `CC` when supplied as a single executable name o
 path, not a shell command containing arguments. Otherwise it attempts `clang`, then
 `gcc` if Clang cannot be found. A compiler invocation or compilation failure is
 reported; an explicitly supplied `CC` does not fall back to another compiler.
-The non-Windows path has not been executed in the local validation performed so far.
+The non-Windows path has been exercised successfully in GitHub-hosted Ubuntu CI
+with `CC=clang`; the GCC fallback was not exercised.
 
 ## Reproduction
 
@@ -95,7 +100,10 @@ requests. It checks out the repository, selects stable Rust with rustfmt and
 Clippy, prints tool versions, and runs the four reproduction commands above.
 It uses the runner's installed Clang with `CC=clang`; the existing Rust integration
 test performs the real C compilation, linking, and execution. There is no separate
-C test in the workflow. Linux execution remains unobserved until a remote run.
+C test in the workflow. [Run 37088601482](https://github.com/varun-raj-77/safeshift/actions/runs/37088601482)
+passed on GitHub-hosted Ubuntu 24.04.5 LTS for commit
+`1ca8fdfe57d27b27dc7255da6442b7a39783fe66`. Both tests passed, including C
+compile/link and execution with exit status 0 and stdout `"safeshift-ss001-ok\n"`.
 
 ## C bootstrap sequence
 
